@@ -8,7 +8,4 @@
 
 	> When the total number of inputs is very small
 
-
-
-
 }
