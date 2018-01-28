@@ -1,0 +1,1 @@
+Extend the abstract machine to support multiplication
