@@ -1,0 +1,2 @@
+-- What effect would generalising the function split
+-- to also return pairs containing the empty list have on the behaviour of solutions
