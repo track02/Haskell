@@ -8,10 +8,10 @@ adderSeq :: IO ()
 adderSeq = do
            input <- getDigit "How many numbers? " -- Determine no. of values to add 
            total <- adderSeq' input -- Evaluate adder using input and hold result in total 
-           putStrLn (show (sum total)) -- Use show to get string repr and then display 
+           putStrLn (show (sum total)) -- Sum the returned IO Int list and display
 
 adderSeq' :: Int -> IO [Int] 
-adderSeq' n = sequence [(getDigit "> ") | _ <- [1..n]]
+adderSeq' n = sequence [(getDigit "> ") | _ <- [1..n]] -- Create a list of IO actions and evaluate with sequence 
 
 
 
