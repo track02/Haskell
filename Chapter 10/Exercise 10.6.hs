@@ -13,16 +13,33 @@ getCh = do hSetEcho stdin False
            hSetEcho stdin True
            return x
 
-readLine :: IO String
-readLine = do c <- getCh 
-              if c == '\n' then
-              	 return []
-              else
-              	if c == '\DEL' then
-              	    do n <- readLine
-              	       return ('\b':n)
-              	       
-              	else
-                    do putChar c
-                       n <- readLine
-                       return (c:n)
+-- Need to handle the following
+    -- Building the string
+    -- Displaying user input
+
+-- we'll use a helper function that can keep track of the current string
+readLine' :: String -> IO String 
+readLine' s = do c <- getCh 
+                 putChar c -- We'll display the read in character back to the user
+                 if c /= '\n' then
+                   if c == '\DEL' then -- If delete key is pressed, we need to remove the last element of the string
+                     do putChar '\b'  -- We also need to update the display, move cursor back, highlighting last character
+                        putChar ' '   -- Replace it with a space
+                        putChar '\b'  -- Move back behind the space
+						-- abc
+						--    ^
+						-- abc
+						--   ^
+						-- ab_
+						--    ^
+						-- ab_
+						--   ^
+                        readLine' (init s) -- Init drops the last element
+                    else
+                      readLine' (s ++ [c]) -- If it's a normal character just add it to the string
+                 else
+                   return s -- When an endline is reached return the string
+
+-- Wrap the helper function
+readLine :: IO String 
+readLine = readLine' [] -- Simply calls the helper function with an initially empty string
