@@ -1,0 +1,5 @@
+-- Modify the tic-tac-toe program to:
+-- let the user decide if they want to play first or second 
+-- allow the length of a winning line to be modified
+-- generate the game tree once, rather than for each move
+-- reduce the size of the game tree using alpha-beta pruning

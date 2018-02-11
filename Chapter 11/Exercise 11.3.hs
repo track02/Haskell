@@ -1,0 +1,5 @@
+-- Modify the tic-tac-toe program to choose a move
+-- that attempts to take the quickest route to win
+-- by calculating the depths of resulting game trees
+-- and selecting the move that results in a tree with 
+-- the smallest depth
