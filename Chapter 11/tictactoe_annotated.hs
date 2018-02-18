@@ -307,9 +307,7 @@ minimax (Node g ts)                                                     -- or B 
                                                                         --
                                                                         -- This labelling process allows us to determine 
                                                                         -- the result of taking a certain move as we can see it's best possible outcome
-                                                                        -- in advance
-
-                                                                        
+                                                                        -- in advance                                                                      
                                                                          
 bestmove :: Grid -> Player -> Grid                                      -- Given a grid and current player the bestmove function
 bestmove g p = head [g' | Node (g',p') _ <- ts, p' == best]             -- picks the best possible move the current player can make
