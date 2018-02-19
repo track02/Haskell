@@ -340,4 +340,4 @@ play' g p                                                              -- checks
    | p == X   = do putStr "Player X is thinking... "                   -- Computer is controlling player X
                    (play $! (bestmove g p)) (next p)                   -- so use bestmove to determine computers move 
                                                                        -- and use resulting grid to call play to display the grid 
-                                                                       -- and swap to the next player O
+                                                                       -- and swap to the next player O  
