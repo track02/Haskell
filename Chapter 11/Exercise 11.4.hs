@@ -75,3 +75,15 @@ wins p g = any line (rows ++ cols ++ dias)
 
 diag :: Grid -> [Player]
 diag g = [g !! n !! n | n <- [0..size-1]]
+
+-- 3) Generate the game tree once, rather than for each move
+-- If a single game tree were to be used for the entire game
+-- A complete tree is generated at the start of the game, after player order is decided
+-- Each turn would now need to accept a tree representing the current state of
+-- the grid and the current players possible moves
+-- When a move is made the tree is 'updated' (root becomes selected move node)
+-- At the end of each turn this updated tree is returned to be used by the following turn
+
+
+-- 4) Alpha-beta pruning
+-- to investigate
