@@ -84,6 +84,49 @@ diag g = [g !! n !! n | n <- [0..size-1]]
 -- When a move is made the tree is 'updated' (root becomes selected move node)
 -- At the end of each turn this updated tree is returned to be used by the following turn
 
+-- 1) Generate a full tree at start of game 
+-- 2) This tree become a parameter of play and play' 
+-- 3) When it's the players turn, match their move to the children of the root 
+--    a) This child then becomes the root of the tree
+-- 4) When it's the ai's turn it uses the tree to select its next move 
+--    a) This child then becomes the root of the tree 
+--
+-- The tree is reduced with each turn depending on the move taken 
+-- Rather than being regenerated with each AI turn 
 
 -- 4) Alpha-beta pruning
--- to investigate
+-- Alpha-beta pruning seeks to decrease the number of nodes evaluated by the 
+-- minimax algorithm in its search tree.
+-- 
+--The algorithm maintains two values, alpha and beta,
+--which represent the minimum score that the maximizing player is assured of 
+--and the maximum score that the minimizing player is assured of respectively.
+--
+--Initially alpha is negative infinity and beta is positive infinity,
+-- i.e. both players start with their worst possible score.
+--
+--Whenever the maximum score that the minimizing player is assured 
+--of becomes less than the minimum score that 
+--the maximizing player is assured of (i.e. beta <= alpha), 
+--the maximising player need not consider the descendants 
+--of this node as they will never be reached in actual play.
+
+-- function alphabeta(node, depth, α, β, maximizingPlayer)
+--      if depth = 0 or node is a terminal node
+--          return the heuristic value of node
+--      if maximizingPlayer
+--          v := -∞
+--          for each child of node
+--              v := max(v, alphabeta(child, depth – 1, α, β, FALSE))
+--              α := max(α, v)
+--              if β ≤ α
+--                  break (* β cut-off *)
+--          return v
+--     else
+--          v := +∞
+--          for each child of node
+--              v := min(v, alphabeta(child, depth – 1, α, β, TRUE))
+--              β := min(β, v)
+--              if β ≤ α
+--                  break (* α cut-off *)
+--          return v
