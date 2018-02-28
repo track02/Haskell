@@ -14,6 +14,9 @@ data Player = O | B | X
 
 type Grid = [[Player]]
 
+data Tree a = Node a [Tree a]
+              deriving Show
+
 size = 3
 
 -- 1) Let user decide to go first or second 
@@ -93,6 +96,56 @@ diag g = [g !! n !! n | n <- [0..size-1]]
 --
 -- The tree is reduced with each turn depending on the move taken 
 -- Rather than being regenerated with each AI turn 
+
+main :: IO ()
+main = do hSetBuffering stdout NoBuffering
+          play empty O (minimax  (gametree empty O)) -- Now generate a complete game tree
+
+
+play :: Grid -> Player ->  Tree (Grid,Player) -> IO () -- Play now takes in a gametree 
+play g p t = do cls
+              goto (1,1)
+              putGrid g
+              play' g p t 
+
+play' :: Grid -> Player -> Tree (Grid, Player) -> IO () -- Play' also takes in a tree
+play' g p t
+   | wins O g = putStrLn "Player O wins!\n"
+   | wins X g = putStrLn "Player X wins!\n"
+   | full g   = putStrLn "It's a draw!\n"
+   | p == O   = do i <- getNat (prompt p)
+                   case move g i p of
+                      []   -> do putStrLn "ERROR: Invalid move"
+                                 play' g p
+                      [g'] -> play g' (next p) (reduceTree t g')
+   | p == X   = do putStr "Player X is thinking... "
+                   play g' (next p) (reduceTree t g') -- The tree is reduced depending on the move selected 
+				   where g' = (bestmove g p t) -- bestmove now uses the tree to pick a move 
+
+-- Best move would also be updated to take in the current tree
+bestmove :: Player -> Tree (Grid, Player) -> Grid
+bestmove p (Node (_,best) ts) = head [g' | Node (g',p') _ <- ts, p' == best]
+				   
+-- Given a tree and a grid find the child with that grid and return 
+reduceTree :: Tree (Grid, Player) -> Grid -> Tree (Grid, Player) 
+reduceTree (Node x ts) g = head [x | x <- ts, g == (treeGrid x)]
+
+-- Given a node retrieve it's grid 
+treeGrid :: Tree (Grid, Player) -> Grid
+treeGrid (Node (g,_) _) = g 
+
+-- Testing tree reduction 
+-- *Main> t = gametree [[O,O,B],[X,X,B],[X,X,B]] O
+-- *Main> mt = minimax t
+-- *Main> reduceTree mt [[O,O,O],[X,X,B],[X,X,B]]
+-- Node ([[O,O,O],[X,X,B],[X,X,B]],O) []
+
+-- Testing new best move 
+-- *Main> t = gametree [[O,O,B],[X,X,B],[X,X,B]] O
+-- *Main> mt = minimax t
+-- *Main> bestmove' O mt
+-- [[O,O,O],[X,X,B],[X,X,B]]
+
 
 -- 4) Alpha-beta pruning
 -- Alpha-beta pruning seeks to decrease the number of nodes evaluated by the 
