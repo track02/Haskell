@@ -148,38 +148,37 @@ treeGrid (Node (g,_) _) = g
 
 
 -- 4) Alpha-beta pruning
--- Alpha-beta pruning seeks to decrease the number of nodes evaluated by the 
--- minimax algorithm in its search tree.
--- 
---The algorithm maintains two values, alpha and beta,
---which represent the minimum score that the maximizing player is assured of 
---and the maximum score that the minimizing player is assured of respectively.
---
---Initially alpha is negative infinity and beta is positive infinity,
--- i.e. both players start with their worst possible score.
---
---Whenever the maximum score that the minimizing player is assured 
---of becomes less than the minimum score that 
---the maximizing player is assured of (i.e. beta <= alpha), 
---the maximising player need not consider the descendants 
---of this node as they will never be reached in actual play.
+-- Alpha-beta pruning is a modification of the existing minimax algorithm which reduces the search space
+-- Need to add a min and max argument to mini max
 
--- function alphabeta(node, depth, α, β, maximizingPlayer)
---      if depth = 0 or node is a terminal node
---          return the heuristic value of node
---      if maximizingPlayer
---          v := -∞
---          for each child of node
---              v := max(v, alphabeta(child, depth – 1, α, β, FALSE))
---              α := max(α, v)
---              if β ≤ α
---                  break (* β cut-off *)
---          return v
---     else
---          v := +∞
---          for each child of node
---              v := min(v, alphabeta(child, depth – 1, α, β, TRUE))
---              β := min(β, v)
---              if β ≤ α
---                  break (* α cut-off *)
---          return v
+minimax :: Tree Grid -> Player -> Player -> Tree (Grid,Player)
+minimax (Node g []) min max -- Now take in min/max for a-b pruning
+   | wins O g  = Node (g,O) []
+   | wins X g  = Node (g,X) []
+   | otherwise = Node (g,B) []
+minimax (Node g ts) min max 
+   | turn g == O = Node (g, minimum ps) ts' -- Min node
+   | turn g == X = Node (g, maximum ps) ts' -- Max node
+                   where
+                      ts' = map minimax ts
+                      ps  = [p | Node (_,p) _ <- ts']
+
+
+
+fun minimax(n: node, d: int, min: int, max: int): int =
+   if leaf(n) or depth=0 return evaluate(n)
+   if n is a max node
+      v := min
+      for each child of n
+         v' := minimax (child,d-1,v,max)
+         if v' > v, v:= v'
+         if v > max return max
+      return v
+   if n is a min node
+      v := max
+      for each child of n
+         v' := minimax (child,d-1,min,v)
+         if v' < v, v:= v'
+         if v < min return min
+      return v
+
