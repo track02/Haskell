@@ -152,33 +152,85 @@ treeGrid (Node (g,_) _) = g
 -- Need to add a min and max argument to mini max
 
 minimax :: Tree Grid -> Player -> Player -> Tree (Grid,Player)
-minimax (Node g []) min max -- Now take in min/max for a-b pruning
+minimax (Node g []) alpha beta -- If we reach a leaf then evaluate 
    | wins O g  = Node (g,O) []
    | wins X g  = Node (g,X) []
    | otherwise = Node (g,B) []
-minimax (Node g ts) min max 
-   | turn g == O = Node (g, minimum ps) ts' -- Min node
-   | turn g == X = Node (g, maximum ps) ts' -- Max node
+minimax (Node g ts) alpha beta -- Otherwise, for nodes 
+   | turn g == O = Node (g, minimum ps) ts' 
+   | turn g == X = Node (g, maximum ps) ts' 
                    where
-                      ts' = map minimax ts
-                      ps  = [p | Node (_,p) _ <- ts']
+				      -- Instead of applying minimax to all children, examine result in turn and decide if we can stop early 
+                      ts' = ab-pruner ts alpha beta (turn g)				  
+                      ps  = [p | Node (_,p) _ <- ts'] -- Strip out child players (values)
 
+-- We'll use the pruner to reduce a list of child nodes 
+ab-pruner :: [Tree Grid] -> Player -> Player -> Player -> [Tree (Grid,Player)]
+ab-pruner [] _ _ _ = [] -- Empty list, stop 
+ab-pruner (c:cs) alpha beta player 
+    -- Computers turn (max)
+    | player == X =  if newalpha >= beta then (result : []) else result : (ab-pruner cs newalpha newbeta player)
+	-- Players turn (min)
+	| player == O =  if alpha >= newbeta then (result : []) else result : (ab-pruner cs newalpha newbeta player )
+	                where 
+					   result = minimax c alpha beta -- Apply minimax to a given child 
+					   score  = getVal result 
+					   -- Update alpha or beta depending on player / score 
+					   newalpha  = if player == X then if score > alpha then score else alpa else alpha 
+					   newbeta   = if player == O then if score < beta then score else beta else beta   
+					   
+getVal Tree (Grid,Player) -> Player 
+getVal (Node (g,p) _) = g 
 
+-- Testing pruner 
 
-fun minimax(n: node, d: int, min: int, max: int): int =
-   if leaf(n) or depth=0 return evaluate(n)
-   if n is a max node
-      v := min
-      for each child of n
-         v' := minimax (child,d-1,v,max)
-         if v' > v, v:= v'
-         if v > max return max
-      return v
-   if n is a min node
-      v := max
-      for each child of n
-         v' := minimax (child,d-1,min,v)
-         if v' < v, v:= v'
-         if v < min return min
-      return v
+-- Given the grid
+-- O X O
+-- X O X 
+-- _ _ _ 
 
+-- If we prune the children (c), on player O's turn with a starting min of O and max of X (-inf +inf)
+-- We have three possible children (last row shown), [O,B,B], [B,O,B], [B,B,O]
+-- Expect pruner to stop searching after first child is evaluated 
+-- Main> abPruner c O X O
+-- [Node ([[O,X,O],[X,O,X],[O,B,B]],O) []]
+-- 
+-- Given the grid 
+-- _ X O
+-- _ O X 
+-- _ _ _
+
+-- The pruner returns the following 
+-- abPruner c X O O
+-- [Node ([[O,X,O],[B,O,X],[B,B,B]],O) 
+--        [Node ([[O,X,O],[X,O,X],[B,B,B]],O) 
+--               [Node ([[O,X,O],[X,O,X],[O,B,B]],O) []]]]
+--
+
+-- Given the grid 
+-- X O X
+-- X _ X
+-- _ O _ 
+
+-- The pruner returns the following 
+-- *Main> abPruner c X O O
+-- [Node ([[X,O,X],[X,O,X],[B,O,B]],O) []] 
+
+-- Showing that the pruner stops after find a path that results in a win 
+
+-- Example of a-b pruning 
+
+-- if (player is computer, i.e., max's turn)
+--    // Find max and store in alpha
+--    for each child
+--       score = minimax(level - 1, opponent, alpha, beta)
+--       if (score > alpha) alpha = score
+--       if (alpha >= beta) break;  // beta cut-off
+--    return alpha
+-- else (player is opponent, i.e., min's turn)
+--    // Find min and store in beta
+--    for each child
+--       score = minimax(level - 1, computer, alpha, beta)
+--       if (score < beta) beta = score
+--       if (alpha >= beta) break;  // alpha cut-off
+--    return beta
