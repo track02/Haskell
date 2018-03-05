@@ -161,22 +161,22 @@ minimax (Node g ts) alpha beta -- Otherwise, for nodes
    | turn g == X = Node (g, maximum ps) ts' 
                    where
 				      -- Instead of applying minimax to all children, examine result in turn and decide if we can stop early 
-                      ts' = ab-pruner ts alpha beta (turn g)				  
+                      ts' = abpruner ts alpha beta (turn g)				  
                       ps  = [p | Node (_,p) _ <- ts'] -- Strip out child players (values)
 
 -- We'll use the pruner to reduce a list of child nodes 
-ab-pruner :: [Tree Grid] -> Player -> Player -> Player -> [Tree (Grid,Player)]
-ab-pruner [] _ _ _ = [] -- Empty list, stop 
-ab-pruner (c:cs) alpha beta player 
+abpruner :: [Tree Grid] -> Player -> Player -> Player -> [Tree (Grid,Player)]
+abpruner [] _ _ _ = [] -- Empty list, stop 
+abpruner (c:cs) alpha beta player 
     -- Computers turn (max)
-    | player == X =  if newalpha >= beta then (result : []) else result : (ab-pruner cs newalpha newbeta player)
+    | player == X =  if newalpha >= beta then (result : []) else result : (abpruner cs newalpha newbeta player)
 	-- Players turn (min)
-	| player == O =  if alpha >= newbeta then (result : []) else result : (ab-pruner cs newalpha newbeta player )
+	| player == O =  if alpha >= newbeta then (result : []) else result : (abpruner cs newalpha newbeta player )
 	                where 
 					   result = minimax c alpha beta -- Apply minimax to a given child 
 					   score  = getVal result 
 					   -- Update alpha or beta depending on player / score 
-					   newalpha  = if player == X then if score > alpha then score else alpa else alpha 
+					   newalpha  = if player == X then if score > alpha then score else alpha else alpha 
 					   newbeta   = if player == O then if score < beta then score else beta else beta   
 					   
 getVal Tree (Grid,Player) -> Player 
